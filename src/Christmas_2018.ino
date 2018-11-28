@@ -25,23 +25,6 @@ void initDetection() {
   digitalWrite(trigPin, LOW);
 }
 
-void servoTurn180DegreesClockwise() {
-  int pos; //variable to store the servo position
-  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-      // in steps of 1 degree
-      myServo.write(pos);              // tell servo to go to position in variable 'pos'
-      delay(15);                       // waits 15ms for the servo to reach the position
-  }
-} 
-
-void servoTurn180DegreesCounterClockwise() {
-  int pos;
-  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myServo.write(pos);              // tell servo to go to position in variable 'pos'
-    delay(15);                       // waits 15ms for the servo to reach the position
-  }
-}
-
 void turnAllLedsOff() {
   digitalWrite(LEDPin, LOW); 
   digitalWrite(TREEPin, LOW); 
@@ -52,6 +35,51 @@ void turnHouseLedOn() {
   digitalWrite(LEDPin, HIGH); 
 }
 
+void turnTreeLedOn() {
+  digitalWrite(TREEPin, HIGH); 
+}
+
+void turnTreeLedOff() {
+  digitalWrite(TREEPin, LOW);
+}
+
+int DivisibleBy8(int n) 
+{ 
+  return (((n >> 3) << 3) == n); 
+} 
+  
+int DivisibleBy16(int n) 
+{ 
+  return (((n >> 4) << 4) == n); 
+} 
+
+void toggleTreeLedBasedOnAngle(angle) {
+  // Toggle LED every 8 degrees
+  if (DivisibleBy16(angle)) {
+    turnTreeLedOff();
+  } else if (DivisibleBy8(angle)) {
+    turnTreeLedOn();
+  }
+}
+
+void servoTurn180DegreesCounterClockwise() {
+  int pos; //variable to store the servo position
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+      // in steps of 1 degree
+      myServo.write(pos);              // tell servo to go to position in variable 'pos'
+      toggleTreeLedBasedOnAngle(pos);
+      delay(15);                       // waits 15ms for the servo to reach the position
+  }
+} 
+
+void servoTurn180DegreesClockwise() {
+  int pos;
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myServo.write(pos);              // tell servo to go to position in variable 'pos'
+    toggleTreeLedBasedOnAngle(pos);
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+}
 
 void setup() {
  Serial.begin (SERIAL_BAUDRATE);
@@ -69,7 +97,6 @@ void setup() {
 }
 
 void loop() {
-  
   initDetection();
 
   long duration, distance; // Duration used to calculate distance
@@ -81,28 +108,12 @@ void loop() {
 
   /////////////////////INTERACTIONS BEGIN 
   if (distance < 100) {
-    //Motor
-    servoTurn180DegreesClockwise();
-    servoTurn180DegreesCounterClockwise();
-      
     //House LED turns on
     turnHouseLedOn();
 
-      //LED on tree flashes
-    digitalWrite(TREEPin, HIGH); 
-    delay(100);
-    digitalWrite(TREEPin, LOW);
-    delay(100);
-
-    digitalWrite(TREEPin, HIGH); 
-    delay(100);
-    digitalWrite(TREEPin, LOW);
-    delay(100);
-
-    digitalWrite(TREEPin, HIGH); 
-    delay(100);
-    digitalWrite(TREEPin, LOW);
-    delay(100);
+    //Motor
+    servoTurn180DegreesCounterClockwise();
+    servoTurn180DegreesClockwise();
   } else {
     turnAllLedsOff();
   }
