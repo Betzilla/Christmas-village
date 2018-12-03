@@ -53,7 +53,7 @@ int DivisibleBy16(int n)
   return (((n >> 4) << 4) == n); 
 } 
 
-void toggleTreeLedBasedOnAngle(angle) {
+void toggleTreeLedBasedOnAngle(int angle) {
   // Toggle LED every 8 degrees
   if (DivisibleBy16(angle)) {
     turnTreeLedOff();
